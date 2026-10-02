@@ -1,36 +1,37 @@
 # Multi-Agent Content Generation Pipeline (LangGraph & Groq)
-
+```
 +-----------------------+
-                  |      START NODE       |
-                  +-----------+-----------+
-                              |
-                              v
-                  +-----------------------+
-                  |    RESEARCHER AGENT   | <--- Gathers raw data, sources,
-                  +-----------+-----------+      and key facts
-                              |
-                              v
-                  +-----------------------+
-                  |      WRITER AGENT     | <--- Drafts content based on 
-                  +-----------+-----------+      research state & feedback
-                              |
-                              v
-                  +-----------------------+
-                  |      EDITOR AGENT     | <--- Evaluates draft quality & 
-                  +-----------+-----------+      structure
-                              |
-                     /-----------------\
-                    /   Needs Revisions? \
-                   /---------------------\
-                     /                 \
-             YES    /                   \   NO (Approved)
-                   v                     v
-       +-----------------------+   +-----------------------+
-       |   FEEDBACK / ROUTE    |   |       END NODE        |
-       |  (Back to Writer)     |   | (Final Content Output)|
-       +-----------------------+   +-----------------------+
+                        |      START NODE       |
+                        +-----------+-----------+
+                                    |
+                                    v
+                        +-----------------------+
+                        |    RESEARCHER AGENT   |  <--- Gathers web data/sources
+                        +-----------+-----------+       Populates `research_data`
+                                    |
+                                    v
+                        +-----------------------+
+                        |      WRITER AGENT     |  <--- Generates draft from research
+                        +-----------+-----------+       Refines using editor feedback
+                                    |
+                                    v
+                        +-----------------------+
+                        |      EDITOR AGENT     |  <--- Reviews draft for quality
+                        +-----------+-----------+       Sets `editor_feedback`
+                                    |
+                           /-----------------\
+                          /   Approved or     \
+                         /  Max Revisions?     \
+                        /-----------------------\
+                           /                 \
+                 NEEDS    /                   \  APPROVED
+               REVISION  /                     \
+                        v                       v
+            +-----------------------+   +-----------------------+
+            |  Route back to Writer |   |       END NODE        |
+            +-----------------------+   +-----------------------+
 
-
+```
 An advanced multi-agent workflows system built using **LangGraph** and powered by **Groq models** to deliver lightning-fast latency. This pipeline orchestrates three distinct AI agents—a **Researcher**, a **Writer**, and an **Editor**—to collaboratively gather data, draft high-quality content, and refine the final output.
 
 ## 🚀 Key Features
