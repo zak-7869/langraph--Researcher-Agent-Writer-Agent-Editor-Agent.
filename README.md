@@ -89,6 +89,9 @@ python app.py
 ```
 ##
 [
+## System Architecture & GitOps Pipeline
+
+```text
 +-----------+       +-------------------+       +-------------------+       +-----------------------+
 | Developer | ----> | Application Repo  | ----> |    Jenkins CI     | ----> |    Docker Registry    |
 +-----------+       |     (GitHub)      |       | (Build & Container)       |  (Docker Hub / ECR)   |
