@@ -1,0 +1,46 @@
+# File: k8s-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langgraph-agents
+  labels:
+    app: langgraph-agents
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: langgraph-agents
+  template:
+    metadata:
+      labels:
+        app: langgraph-agents
+    spec:
+      containers:
+      - name: agent-app
+        image: your-registry/langgraph-agents:latest  # Replaced dynamically by Jenkins/ArgoCD
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - secretRef:
+            name: langgraph-secrets
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: "500m"
+            memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langgraph-agents-service
+spec:
+  selector:
+    app: langgraph-agents
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: ClusterIP

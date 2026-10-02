@@ -1,0 +1,67 @@
+// File: Jenkinsfile
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = "your-registry"
+        IMAGE_NAME = "langgraph-agents"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        GIT_CREDENTIALS_ID = "git-credentials"
+        MANIFEST_REPO = "://github.com"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Test & Lint') {
+            steps {
+                sh '''
+                   pip install pytest flake8
+                   # Run your multi-agent workflow tests here
+                   # pytest tests/
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}")
+                }
+            }
+        }
+
+        stage('Push to Registry') {
+            steps {
+                script {
+                    docker.withRegistry('https://' + REGISTRY, 'registry-credentials') {
+                        dockerImage.push()
+                        dockerImage.push('latest')
+                    }
+                }
+            }
+        }
+
+        stage('Update GitOps Manifest') {
+            steps {
+                // Modifies the image tag in the deployment manifest file to trigger ArgoCD sync
+                withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh """
+                        git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${MANIFEST_REPO} gitops-repo
+                        cd gitops-repo
+                        sed -i 's|image: .*|image: ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s-manifest.yaml
+                        git config user.email "jenkins@ci.com"
+                        git config user.name "Jenkins CI"
+                        git add k8s-manifest.yaml
+                        git commit -m "Update image tag to ${IMAGE_TAG} [skip ci]"
+                        git push origin main
+                    """
+                }
+            }
+        }
+    }
+}

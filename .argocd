@@ -1,0 +1,21 @@
+# File: argocd-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: langgraph-agents-gitops
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com'
+    targetRevision: HEAD
+    path: '.' # Location of k8s-manifest.yaml inside the repo
+  destination:
+    server: 'https://default.svc'
+    namespace: production
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
