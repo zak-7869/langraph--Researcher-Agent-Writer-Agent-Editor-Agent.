@@ -79,12 +79,39 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory and add your Groq API key:
 ```env
 GROQ_API_KEY=your_groq_api_key_here
+
+
 ```
 
 ### 5. Run the Application
 ```bash
 python app.py
 ```
-
+##
+[
++-----------+       +-------------------+       +-------------------+       +-----------------------+
+| Developer | ----> | Application Repo  | ----> |    Jenkins CI     | ----> |    Docker Registry    |
++-----------+       |     (GitHub)      |       | (Build & Container)       |  (Docker Hub / ECR)   |
+                    +-------------------+       +---------+---------+       +-----------+-----------+
+                                                          |                             |
+                                                          | Update Tag                  |
+                                                          v                             |
+                                                +-------------------+                   |
+                                                |  GitOps Config    |                   | Pull
+                                                | Manifest Repository                   | Image
+                                                +---------+---------+                   |
+                                                          |                             |
+                                                          v                             v
+                                                +---------------------------------------------------+
+                                                |                  ArgoCD (in K8s)                  |
+                                                +-------------------------+-------------------------+
+                                                                          |
+                                                                          v Sync Deployment
+                                                +---------------------------------------------------+
+                                                |                 Kubernetes Cluster                |
+                                                |      [ Pods | Services | Ingress | Stateful ]      |
+                                                +---------------------------------------------------+
+]
+##
 ## 📝 License
 This project is open-source and available under the MIT License.
